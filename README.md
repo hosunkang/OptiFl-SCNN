@@ -7,5 +7,4 @@ Fast-SCNN-pytorch : [https://github.com/Tramac/Fast-SCNN-pytorch](https://github
 2. train
 ```
 python train.py --model fast_scnn --dataset citys
-
 ```
