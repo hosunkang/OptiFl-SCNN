@@ -1,4 +1,5 @@
 # OptiFl-SCNN
+## Not ready, test
 ## Reference
 Fast-SCNN-pytorch : [https://github.com/Tramac/Fast-SCNN-pytorch](https://github.com/Tramac/Fast-SCNN-pytorch)
 
