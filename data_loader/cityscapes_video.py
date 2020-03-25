@@ -49,8 +49,9 @@ class CitySegmentation_video(data.Dataset):
         self.transform = transform
         self.base_size = base_size
         self.crop_size = crop_size
-        self.images = _get_city_pairs(self.root, self.split)
+        self.images, self.image_names = _get_city_pairs(self.root, self.split)
         self.images.sort()
+        self.image_names.sort()
         if len(self.images) == 0:
             raise RuntimeError("Found 0 images in subfolders of: " + self.root + "\n")
         self.valid_classes = [7, 8, 11, 12, 13, 17, 19, 20, 21, 22,
@@ -63,9 +64,12 @@ class CitySegmentation_video(data.Dataset):
                               -1, -1, 16, 17, 18])
         self._mapping = np.array(range(-1, len(self._key) - 1)).astype('int32')
 
+    def get_image_infos(self):
+        return self.images, self.image_names
 
     def __getitem__(self, index):
         img = Image.open(self.images[index]).convert('RGB')
+        name = self.image_names[index]
         if self.mode == 'test':
             if self.transform is not None:
                 img = self.transform(img)
@@ -150,18 +154,20 @@ class CitySegmentation_video(data.Dataset):
 def _get_city_pairs(folder, split='val'):
     def get_video_path(img_folder):
         img_paths = []
+        img_names = []
         for root, _, files in os.walk(img_folder):
             for filename in files:
                 if filename.endswith(".png"):
                     imgpath = os.path.join(root, filename)
                     foldername = os.path.basename(os.path.dirname(imgpath))
                     img_paths.append(imgpath)
+                    img_names.append(filename)
         print('Found {} images in the folder {}'.format(len(img_paths), img_folder))
-        return img_paths
+        return img_paths, img_names
 
     img_folder = os.path.join(folder, 'leftImg8bit/' + split)
-    img_paths = get_video_path(img_folder)
-    return img_paths
+    img_paths, img_names = get_video_path(img_folder)
+    return img_paths, img_names
 
 
 if __name__ == '__main__':
