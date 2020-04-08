@@ -53,16 +53,15 @@ def _getvocpallete(num_cls):
             lab >>= 3
     return pallete
 
-def get_mask(npimg,class_num):
+def get_mask(npimg, img, class_num):
     height, width = npimg.shape
-    npimg2 = npimg.copy()
-    for i in range(height):
-        for j in range(width):
-            if npimg2[i,j] == class_num:
-                npimg2[i,j] = 0
-            else:
-                npimg2[i,j] = 255
-    return npimg2
+    for y in range(height):
+        for x in range(width):
+            if npimg[y,x] != class_num:
+                img.itemset(y,x, 0, 0) 
+                img.itemset(y,x, 1, 0)
+                img.itemset(y,x, 2, 0)
+    return img
 
 vocpallete = _getvocpallete(256)
 

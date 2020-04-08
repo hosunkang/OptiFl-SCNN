@@ -15,7 +15,6 @@ from utils.visualize import get_color_pallete, get_mask
 
 from train import parse_args
 
-
 class Evaluator(object):
     def __init__(self, args):
         self.args = args
@@ -29,12 +28,11 @@ class Evaluator(object):
             transforms.Normalize([.485, .456, .406], [.229, .224, .225]),
         ])
         # dataset and dataloader
-        val_dataset = get_segmentation_dataset_video(args.dataset, split='demovideo', mode='testval',
-                                               transform=input_transform)
+        val_dataset = get_segmentation_dataset_video(args.dataset, split='demovideo', 
+                                                                    mode='testval',
+                                                                    transform=input_transform)
         cityscape = CitySegmentation_video()
         self.img_roots, self.img_names = cityscape.get_image_infos()
-        # for idx, item in enumerate(self.img_names):
-        #     self.img_names[idx] = item.replace('.png', '')
         self.val_loader = data.DataLoader(dataset=val_dataset,
                                           batch_size=1,
                                           shuffle=False)
@@ -46,30 +44,25 @@ class Evaluator(object):
 
     def eval(self):
         self.model.eval()
+        old_image = np.zeros((1024,2048,3), dtype=np.uint8)
         for i, image in enumerate(self.val_loader):
             image = image.to(self.args.device)
             outputs = self.model(image)
-
             pred = torch.argmax(outputs[0],1)
+
             pred = pred.cpu().data.numpy()
             predict = pred.squeeze(0)
-
             mask = get_color_pallete(predict, self.args.dataset)
-            #mask.save(os.path.join(self.outdir, 'seg_{}.png'.format(i))) #save segmentation
-
-            mask_np = np.asarray(mask)
-            mask_np = get_mask(mask_np, 0)
-            mask_np = cv2.cvtColor(mask_np, cv2.COLOR_GRAY2BGR)
+            # mask.save(os.path.join(self.outdir, 'seg_{}.png'.format(i))) #save segmentation
 
             img = cv2.imread(self.img_roots[i])
-            cv2.imwrite(os.path.join(self.outdir, 'msk_{}.png'.format(i)),cv2.add(mask_np,img))
-            # cv2.waitKey()
-            # cv2.destroyAllWindows()
+            new_image = get_mask(predict, img, 11)
             
+            cv2.imwrite(os.path.join(self.outdir, 'msk_{:04d}.png'.format(i)),new_image)
             print('{} is completed'.format(i))
-            if i==5:
-                break
-    
+            if i == 300: break
+            # old_image = new_image
+            
 
 if __name__ == '__main__':
     args = parse_args()
