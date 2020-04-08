@@ -9,3 +9,7 @@ Fast-SCNN-pytorch : [https://github.com/Tramac/Fast-SCNN-pytorch](https://github
 ```
 python train.py --model fast_scnn --dataset citys
 ```
+3. flow
+```
+python flow.py (--datasets video_human --method farneback)
+```
