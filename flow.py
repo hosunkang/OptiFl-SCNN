@@ -46,10 +46,7 @@ class FLOW():
         img_paths.sort()
         return img_paths
 
-    def farneback(self, old, new):
-        old_gray = cv2.cvtColor(old,cv2.COLOR_BGR2GRAY)
-        new_gray = cv2.cvtColor(new,cv2.COLOR_BGR2GRAY)
-
+    def farneback(self, old_gray, new_gray):
         flow = cv2.calcOpticalFlowFarneback(old_gray,new_gray, None, 0.5,3,15,3,5,1.1,0)
         mag, ang = cv2.cartToPolar(flow[...,0], flow[...,1])
         self.hsv[...,0] = ang*180/np.pi/2
@@ -87,6 +84,7 @@ class FLOW():
                 if method == 'Farneback':
                     self.hsv = np.zeros_like(new)
                     self.hsv[...,1] = 255
+                    old_gray = cv2.cvtColor(new,cv2.COLOR_BGR2GRAY)
                 elif method == 'lucaskanade':
                     old_gray = cv2.cvtColor(new,cv2.COLOR_BGR2GRAY)
                     p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
@@ -96,7 +94,8 @@ class FLOW():
                     return
             else:
                 if method == 'Farneback':
-                    rgb = self.farneback(old,new)
+                    new_gray = cv2.cvtColor(new,cv2.COLOR_BGR2GRAY)
+                    rgb = self.farneback(old_gray,new_gray)
                     old = new
                 elif method == 'lucaskanade':
                     rgb, good_new = self.lucaskanade(old_gray,new, p0)
@@ -104,7 +103,7 @@ class FLOW():
                     p0 = good_new.reshape(-1,1,2)
 
                 cv2.imshow('frame2',rgb)
-                k = cv2.waitKey(0) & 0xff
+                k = cv2.waitKey(1) & 0xff 
                 if k == 27:
                     break
                 # cv2.imwrite('./test_result/opti_{:04d}.png'.format(idx), rgb)
